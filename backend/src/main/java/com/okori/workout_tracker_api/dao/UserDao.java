@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class UserDao implements Dao<User> {
-
+    // TODO: https://www.javaguides.net/2018/08/data-access-object-pattern-in-java.html
     private List<User> users = new ArrayList<>();
 
     public UserDao() {
-        users.add(new User("John", "john@domain.com"));
-        users.add(new User("Susan", "susan@domain.com"));
     }
 
     @Override
