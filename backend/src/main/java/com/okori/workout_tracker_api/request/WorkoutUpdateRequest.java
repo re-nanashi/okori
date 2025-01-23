@@ -1,16 +1,15 @@
-package com.okori.workout_tracker_api.dto;
+package com.okori.workout_tracker_api.request;
 
-public class ExerciseDTO {
+public class WorkoutUpdateRequest {
     private Long id;
     private String name;
-    private String type;
+    private String category;
     private String description;
 
-    public ExerciseDTO() {}
-    public ExerciseDTO(Long id, String name, String type, String description) {
-        this.id = id;
+    public WorkoutUpdateRequest() {}
+    public WorkoutUpdateRequest(String name, String category, String description) {
         this.name = name;
-        this.type = type;
+        this.category = category;
         this.description = description;
     }
 
@@ -30,12 +29,12 @@ public class ExerciseDTO {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getCategory() {
+        return category;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDescription() {

@@ -1,13 +1,6 @@
 package com.okori.workout_tracker_api.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "exercise")
 public class Exercise {
@@ -28,13 +21,55 @@ public class Exercise {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "workout_id")
-    @Column(name = "workout_id", nullable = false)
+    @JoinColumn(name = "workout_id", nullable = false)
     private Workout workout;
 
-    public Exercise(String name, String type, String description) {
+    public Exercise() {}
+
+    public Exercise(String name, String type, String description, Workout workout) {
         this.name = name;
         this.type = type;
         this.description = description;
+        this.workout = workout;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Workout getWorkout() {
+        return workout;
+    }
+
+    public void setWorkout(Workout workout) {
+        this.workout = workout;
     }
 }

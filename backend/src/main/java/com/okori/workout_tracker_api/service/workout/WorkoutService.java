@@ -1,14 +1,17 @@
 package com.okori.workout_tracker_api.service.workout;
 
 import com.okori.workout_tracker_api.dto.ExerciseDTO;
-import com.okori.workout_tracker_api.dto.WorkoutDTO; import com.okori.workout_tracker_api.dto.WorkoutScheduleDTO; import com.okori.workout_tracker_api.entity.Exercise;
+import com.okori.workout_tracker_api.dto.WorkoutDTO;
+import com.okori.workout_tracker_api.dto.WorkoutScheduleDTO;
+import com.okori.workout_tracker_api.entity.Exercise;
 import com.okori.workout_tracker_api.entity.Workout;
 import com.okori.workout_tracker_api.entity.WorkoutSchedule;
-import com.okori.workout_tracker_api.exceptions.WorkoutNotFoundException;
+import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 import com.okori.workout_tracker_api.repository.ExerciseRepository;
 import com.okori.workout_tracker_api.repository.WorkoutRepository;
 import com.okori.workout_tracker_api.repository.WorkoutScheduleRepository;
 import com.okori.workout_tracker_api.request.AddWorkoutRequest;
+import com.okori.workout_tracker_api.request.WorkoutUpdateRequest;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,27 +42,27 @@ public class WorkoutService implements IWorkoutService {
         Workout newWorkout = new Workout(
                 request.getName(),
                 request.getCategory(),
-                request.getDescription()
-        );
+                request.getDescription());
 
-        // TODO: Can we bypass saving each exercises and schedules to their respective repositories
-        //  by saving workout to its respective repository?
         for (ExerciseDTO exerciseDto : request.getExercises()) {
             Exercise newExercise = new Exercise(
                     exerciseDto.getName(),
                     exerciseDto.getType(),
-                    exerciseDto.getDescription()
-            );
+                    exerciseDto.getDescription(),
+                    newWorkout);
             newExercise.setWorkout(newWorkout);
             newWorkout.getExercises().add(newExercise);
         }
 
         for (WorkoutScheduleDTO workoutScheduleDto : request.getWorkoutSchedules()) {
             WorkoutSchedule newWorkoutSchedule = new WorkoutSchedule(
+                    // TODO: Validate Date and Time input
+                    //  it should be following:
+                    //  Date: yyyy-MM-dd
+                    //  Time: HH:mm:ss
                     workoutScheduleDto.getDate(),
-                    workoutScheduleDto.getTime()
-            );
-            newWorkoutSchedule.setWorkout(newWorkout);
+                    workoutScheduleDto.getTime(),
+                    newWorkout);
             newWorkout.getWorkoutSchedules().add(newWorkoutSchedule);
         }
 
@@ -67,28 +70,36 @@ public class WorkoutService implements IWorkoutService {
     }
 
     @Override
-    public Workout getWorkoutById(Long id) throws WorkoutNotFoundException {
+    public Workout getWorkoutById(Long id) throws ResourceNotFoundException {
         return workoutRepository
                 .findById(id)
-                .orElseThrow(() -> new WorkoutNotFoundException("Workout not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout not found."));
     }
 
     @Override
-    public Workout updateWorkout(Workout workout) throws WorkoutNotFoundException {
-        // Verify if the workout id exists in the database
-        workoutRepository
-                .findById(workout.getId())
-                .orElseThrow(() -> new WorkoutNotFoundException("Workout not found. Update aborted."));
-        // Update the workout if found
-        return workoutRepository.save(workout);
+    public Workout updateWorkout(WorkoutUpdateRequest request, Long workoutId) {
+        return workoutRepository
+                .findById(workoutId)
+                .map(existingWorkout -> updateExistingWorkout(existingWorkout, request))
+                .map(workoutRepository::save)
+                .orElseThrow(() -> new ResourceNotFoundException("Workout not found. Update aborted."));
+    }
+
+    private Workout updateExistingWorkout(Workout existingWorkout, WorkoutUpdateRequest request) {
+        existingWorkout.setName(request.getName());
+        existingWorkout.setCategory(request.getCategory());
+        existingWorkout.setDescription(request.getDescription());
+
+        return existingWorkout;
     }
 
     @Override
-    public void deleteWorkoutById(Long id) throws WorkoutNotFoundException {
+    public void deleteWorkoutById(Long id) throws ResourceNotFoundException {
         // Verify if the workout id exists in the database
         workoutRepository
                 .findById(id)
-                .orElseThrow(() -> new WorkoutNotFoundException("Workout not found. Deletion aborted."));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout not found. Deletion aborted."));
+
         // Delete the workout if found
         workoutRepository.deleteById(id);
     }
@@ -117,7 +128,6 @@ public class WorkoutService implements IWorkoutService {
     public int countWorkoutsByCategory(String category) {
         return workoutRepository.findAllByCategory(category).size();
     }
-
 
     @Override
     public List<WorkoutDTO> getConvertedWorkouts(List<Workout> workouts) {
