@@ -6,7 +6,6 @@ import com.okori.workout_tracker_api.dto.WorkoutScheduleDTO;
 import java.util.List;
 
 public class AddWorkoutRequest {
-    private Long id;
     private String name;
     private String category;
     private String description;
@@ -20,14 +19,6 @@ public class AddWorkoutRequest {
         this.description = description;
         this.exercises = exercises;
         this.workoutSchedules = workoutSchedules;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
