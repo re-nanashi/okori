@@ -27,11 +27,16 @@ public class Workout {
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSchedule> workoutSchedules = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Workout() {}
-    public Workout(String name, String category, String description) {
+    public Workout(String name, String category, String description, User user) {
         this.name = name;
         this.category = category;
         this.description = description;
+        this.user = user;
     }
 
     public Long getId() {
@@ -80,5 +85,13 @@ public class Workout {
 
     public void setWorkoutSchedules(List<WorkoutSchedule> workoutSchedules) {
         this.workoutSchedules = workoutSchedules;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
