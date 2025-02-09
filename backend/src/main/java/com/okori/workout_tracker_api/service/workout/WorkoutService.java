@@ -4,9 +4,11 @@ import com.okori.workout_tracker_api.dto.ExerciseDTO;
 import com.okori.workout_tracker_api.dto.WorkoutDTO;
 import com.okori.workout_tracker_api.dto.WorkoutScheduleDTO;
 import com.okori.workout_tracker_api.entity.Exercise;
+import com.okori.workout_tracker_api.entity.User;
 import com.okori.workout_tracker_api.entity.Workout;
 import com.okori.workout_tracker_api.entity.WorkoutSchedule;
 import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
+import com.okori.workout_tracker_api.exceptions.UnauthorizedAccessException;
 import com.okori.workout_tracker_api.repository.ExerciseRepository;
 import com.okori.workout_tracker_api.repository.WorkoutRepository;
 import com.okori.workout_tracker_api.repository.WorkoutScheduleRepository;
@@ -33,16 +35,17 @@ public class WorkoutService implements IWorkoutService {
     private ModelMapper modelMapper;
 
     @Override
-    public Workout addWorkout(AddWorkoutRequest request) {
-        return workoutRepository.save(createWorkout(request));
+    public Workout addWorkout(AddWorkoutRequest request, User user) {
+        Workout newWorkout = createWorkout(request);
+        newWorkout.setUser(user);
+        return workoutRepository.save(newWorkout);
     }
 
-    // Can be implemented with a mapper
     private Workout createWorkout(AddWorkoutRequest request) {
-        Workout newWorkout = new Workout(
-                request.getName(),
-                request.getCategory(),
-                request.getDescription());
+        Workout newWorkout = new Workout();
+        newWorkout.setName(request.getName());
+        newWorkout.setCategory(request.getCategory());
+        newWorkout.setDescription(request.getDescription());
 
         for (ExerciseDTO exerciseDto : request.getExercises()) {
             Exercise newExercise = new Exercise(
@@ -50,16 +53,15 @@ public class WorkoutService implements IWorkoutService {
                     exerciseDto.getType(),
                     exerciseDto.getDescription(),
                     newWorkout);
-            newExercise.setWorkout(newWorkout);
             newWorkout.getExercises().add(newExercise);
         }
 
         for (WorkoutScheduleDTO workoutScheduleDto : request.getWorkoutSchedules()) {
             WorkoutSchedule newWorkoutSchedule = new WorkoutSchedule(
                     // TODO: Validate Date and Time input
-                    //  it should be following:
-                    //  Date: yyyy-MM-dd
-                    //  Time: HH:mm:ss
+                    // it should be following:
+                    // Date: yyyy-MM-dd
+                    // Time: HH:mm:ss
                     workoutScheduleDto.getDate(),
                     workoutScheduleDto.getTime(),
                     newWorkout);
@@ -70,19 +72,34 @@ public class WorkoutService implements IWorkoutService {
     }
 
     @Override
-    public Workout getWorkoutById(Long id) throws ResourceNotFoundException {
-        return workoutRepository
-                .findById(id)
+    public Workout getWorkoutById(Long id, User user) throws ResourceNotFoundException, UnauthorizedAccessException {
+        Workout existingWorkout = workoutRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout not found."));
+
+        if (!existingWorkout.getUser().equals(user)) {
+            throw new UnauthorizedAccessException("You are not authorized to access this user");
+        }
+
+        return existingWorkout;
     }
 
     @Override
-    public Workout updateWorkout(WorkoutUpdateRequest request, Long workoutId) {
-        return workoutRepository
-                .findById(workoutId)
-                .map(existingWorkout -> updateExistingWorkout(existingWorkout, request))
-                .map(workoutRepository::save)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found. Update aborted."));
+    public List<Workout> getAllWorkoutsForUser(User user) {
+        return workoutRepository.findAllByUser(user);
+    }
+
+    @Override
+    public Workout updateWorkout(WorkoutUpdateRequest request, Long workoutId, User user) throws ResourceNotFoundException, UnauthorizedAccessException {
+        // Ensure the authenticated user has access to the requested workout data
+        Workout existingWorkout = workoutRepository.findById(workoutId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workout not found. Update aborted"));
+
+        if (!existingWorkout.getUser().equals(user)) {
+            throw new UnauthorizedAccessException("You are not authorized to access this user");
+        }
+
+        Workout updatedWorkout = updateExistingWorkout(existingWorkout, request);
+        return workoutRepository.save(updatedWorkout);
     }
 
     private Workout updateExistingWorkout(Workout existingWorkout, WorkoutUpdateRequest request) {
@@ -94,44 +111,16 @@ public class WorkoutService implements IWorkoutService {
     }
 
     @Override
-    public void deleteWorkoutById(Long id) throws ResourceNotFoundException {
-        // Verify if the workout id exists in the database
-        workoutRepository
-                .findById(id)
+    public void deleteWorkoutById(Long id, User user) throws ResourceNotFoundException {
+        Workout existingWorkout = workoutRepository
+                .findByUserAndId(user, id)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout not found. Deletion aborted."));
 
-        // Delete the workout if found
+        if (!existingWorkout.getUser().equals(user)) {
+            throw new UnauthorizedAccessException("You are not authorized to access this user");
+        }
+
         workoutRepository.deleteById(id);
-    }
-
-    @Override
-    public List<Workout> getAllWorkouts() {
-        return workoutRepository.findAll();
-    }
-
-    @Override
-    public List<Workout> getWorkoutsByName(String name) {
-        return workoutRepository.findAllByNameContainingIgnoreCase(name);
-    }
-
-    @Override
-    public List<Workout> getWorkoutsByCategory(String category) {
-        return workoutRepository.findAllByCategory(category);
-    }
-
-    @Override
-    public List<Workout> getWorkoutsByNameAndCategory(String name, String category) {
-        return workoutRepository.findAllByNameContainingIgnoreCaseAndCategory(name, category);
-    }
-
-    @Override
-    public int countWorkoutsByCategory(String category) {
-        return workoutRepository.findAllByCategory(category).size();
-    }
-
-    @Override
-    public List<WorkoutDTO> getConvertedWorkouts(List<Workout> workouts) {
-        return workouts.stream().map(this::convertToDto).toList();
     }
 
     @Override
@@ -153,5 +142,10 @@ public class WorkoutService implements IWorkoutService {
         workoutDTO.setWorkoutSchedules(workoutScheduleDtos);
 
         return workoutDTO;
+    }
+
+    @Override
+    public List<WorkoutDTO> getConvertedWorkouts(List<Workout> workouts) {
+        return workouts.stream().map(this::convertToDto).toList();
     }
 }
