@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
 // TODO: Work on business logic validations
 @Service
 @Transactional
@@ -149,3 +150,4 @@ public class WorkoutService implements IWorkoutService {
         return workouts.stream().map(this::convertToDto).toList();
     }
 }
+*/

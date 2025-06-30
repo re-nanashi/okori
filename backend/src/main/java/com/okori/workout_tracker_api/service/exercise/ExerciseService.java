@@ -1,7 +1,7 @@
 package com.okori.workout_tracker_api.service.exercise;
 
 import com.okori.workout_tracker_api.entity.Exercise;
-import com.okori.workout_tracker_api.exceptions.ExerciseNotFoundException;
+import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 import com.okori.workout_tracker_api.repository.ExerciseRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,28 +21,28 @@ public class ExerciseService implements IExerciseService {
     }
 
     @Override
-    public Exercise getExerciseById(Long id) throws ExerciseNotFoundException {
+    public Exercise getExerciseById(Long id) throws ResourceNotFoundException {
         return exerciseRepository
                 .findById(id)
-                .orElseThrow(() -> new ExerciseNotFoundException("Exercise not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise not found."));
     }
 
     @Override
-    public Exercise updateExercise(Exercise exercise) throws ExerciseNotFoundException {
+    public Exercise updateExercise(Exercise exercise) throws ResourceNotFoundException {
         // Get the id then verify if the id exists in the database
         exerciseRepository
                 .findById(exercise.getId())
-                .orElseThrow(() -> new ExerciseNotFoundException("Exercise not found. Update aborted."));
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise not found. Update aborted."));
         // Update the exercise if found
         return exerciseRepository.save(exercise);
     }
 
     @Override
-    public void deleteExerciseById(Long id) throws ExerciseNotFoundException {
+    public void deleteExerciseById(Long id) throws ResourceNotFoundException {
         // Verify if the exercise id exists in the database
         exerciseRepository
                 .findById(id)
-                .orElseThrow(() -> new ExerciseNotFoundException("Exercise not found. Deletion aborted."));
+                .orElseThrow(() -> new ResourceNotFoundException("Exercise not found. Deletion aborted."));
         // Delete the exercise if found
         exerciseRepository.deleteById(id);
     }

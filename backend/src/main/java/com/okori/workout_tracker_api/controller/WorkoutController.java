@@ -6,7 +6,7 @@ import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 import com.okori.workout_tracker_api.request.AddWorkoutRequest;
 import com.okori.workout_tracker_api.request.WorkoutUpdateRequest;
 import com.okori.workout_tracker_api.response.ApiResponse;
-import com.okori.workout_tracker_api.service.workout.WorkoutService;
+//import com.okori.workout_tracker_api.service.workout.WorkoutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,19 +16,16 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+/**
 @RestController
 @RequestMapping("${api.prefix}/workouts")
 public class WorkoutController {
     @Autowired
     private WorkoutService workoutService;
 
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse> getAllWorkouts() {
-        List<Workout> workouts = workoutService.getAllWorkouts();
-        List<WorkoutDTO> convertedWorkouts = workoutService.getConvertedWorkouts(workouts);
-        return ResponseEntity.ok(new ApiResponse("Success", convertedWorkouts));
-    }
-
+    // TODO: Since we now have a user and we need to verify first if the user is accessing the data, we need to check if
+    //  the one accessing the data is indeed the user.
+    //  Task: Implement getWorkoutById() using User as parameter
     @GetMapping("/{workoutId}/workout")
     public ResponseEntity<ApiResponse> getWorkoutById(@PathVariable Long workoutId) {
         try {
@@ -73,3 +70,4 @@ public class WorkoutController {
         }
     }
 }
+ */

@@ -6,13 +6,17 @@ import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 import com.okori.workout_tracker_api.repository.UserRepository;
 import com.okori.workout_tracker_api.request.CreateUserRequest;
 import com.okori.workout_tracker_api.request.UserUpdateRequest;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
+@Transactional
 public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepository;
@@ -29,15 +33,15 @@ public class UserService implements IUserService {
     @Override
     public User createUser(CreateUserRequest request) {
         return Optional.of(request)
-                .filter(user -> !userRepository.existsByEmail(request.getEmail()))
+                .filter(user -> !userRepository.existsByUsername(request.getUsername()))
                 .map(req -> {
                     User user = new User(
                             request.getFirstName(),
                             request.getLastName(),
-                            request.getEmail(),
+                            request.getUsername(),
                             request.getPassword());
                     return userRepository.save(user);
-                }).orElseThrow(() -> new ResourceNotFoundException("Oops!" +request.getEmail() +" already exists!"));
+                }).orElseThrow(() -> new ResourceNotFoundException("Oops!" +request.getUsername() +" already exists!"));
     }
 
     @Override
@@ -70,7 +74,7 @@ public class UserService implements IUserService {
     @Override
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userRepository.findByEmail(email);
+        String username = authentication.getName();
+        return userRepository.findByUsername(username);
     }
 }

@@ -1,15 +1,15 @@
 package com.okori.workout_tracker_api.service.exercise;
 
 import com.okori.workout_tracker_api.entity.Exercise;
-import com.okori.workout_tracker_api.exceptions.ExerciseNotFoundException;
+import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 
 public interface IExerciseService {
     Exercise addExercise(Exercise exercise);
-    Exercise getExerciseById(Long id) throws ExerciseNotFoundException;
-    Exercise updateExercise(Exercise exercise) throws ExerciseNotFoundException;
-    void deleteExerciseById(Long id) throws ExerciseNotFoundException;
+    Exercise getExerciseById(Long id) throws ResourceNotFoundException;
+    Exercise updateExercise(Exercise exercise) throws ResourceNotFoundException;
+    void deleteExerciseById(Long id) throws ResourceNotFoundException;
     List<Exercise> getAllExercises();
     List<Exercise> getExercisesByName(String name); //
     List<Exercise> getExercisesByType(String type); //
