@@ -21,7 +21,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userId}/user")
+    @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse> getUserById(@PathVariable Long userId) {
         try {
             User user = userService.getUserById(userId);
@@ -32,20 +32,7 @@ public class UserController {
         }
     }
 
-    /**
-    @PostMapping("/add")
-    public ResponseEntity<ApiResponse> createUser(@RequestBody CreateUserRequest request) {
-        try {
-            User user = userService.createUser(request);
-            UserDTO userDTO = userService.convertUserToDto(user);
-            return ResponseEntity.ok(new ApiResponse("Create user success", userDTO));
-        } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(CONFLICT).body(new ApiResponse(e.getMessage(), null));
-        }
-    }
-    */
-
-    @PutMapping("/{userId}/update")
+    @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse> updateUser(@RequestBody UserUpdateRequest request, @PathVariable Long userId) {
         try {
             User user = userService.updateUser(request, userId);
@@ -56,7 +43,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{userId}/delete")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable Long userId) {
         try {
             userService.deleteUser(userId);

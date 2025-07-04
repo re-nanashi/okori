@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
 // TODO: Work on business logic validations
 @Service
 @Transactional
@@ -77,8 +76,9 @@ public class WorkoutService implements IWorkoutService {
         Workout existingWorkout = workoutRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout not found."));
 
+        // Check if the currently loggedIn user is really the owner of the resource
         if (!existingWorkout.getUser().equals(user)) {
-            throw new UnauthorizedAccessException("You are not authorized to access this user");
+            throw  new UnauthorizedAccessException("Restricted resource");
         }
 
         return existingWorkout;
@@ -150,4 +150,3 @@ public class WorkoutService implements IWorkoutService {
         return workouts.stream().map(this::convertToDto).toList();
     }
 }
-*/

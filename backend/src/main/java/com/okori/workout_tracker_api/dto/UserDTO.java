@@ -10,12 +10,13 @@ public class UserDTO {
     private List<WorkoutDTO> workouts;
 
     public UserDTO() {}
-    public UserDTO(Long id, String firstName, String lastName, String email, List<WorkoutDTO> workouts) {
+    //public UserDTO(Long id, String firstName, String lastName, String email, List<WorkoutDTO> workouts) {
+    public UserDTO(Long id, String firstName, String lastName, String email) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.workouts = workouts;
+        // this.workouts = workouts;
     }
 
     public Long getId() {

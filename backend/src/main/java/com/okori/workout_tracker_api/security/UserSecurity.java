@@ -6,9 +6,11 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
 
+@Component
 public class UserSecurity implements AuthorizationManager<RequestAuthorizationContext> {
     @Autowired
     private UserRepository userRepository;
@@ -20,7 +22,7 @@ public class UserSecurity implements AuthorizationManager<RequestAuthorizationCo
         return new AuthorizationDecision(hasUserId(authentication, userId));
     }
 
-    // TODO: Confirm if this does work
+    // What does do
     private boolean hasUserId(Authentication authentication, Long userId) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;

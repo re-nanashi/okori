@@ -2,6 +2,7 @@ package com.okori.workout_tracker_api.security.config;
 
 import com.okori.workout_tracker_api.security.AuthEntryPointJwt;
 import com.okori.workout_tracker_api.security.AuthTokenFilter;
+import com.okori.workout_tracker_api.security.UserSecurity;
 import com.okori.workout_tracker_api.service.user.CustomUserDetailsService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class WorkoutTrackerConfig {
     @Autowired
-    CustomUserDetailsService userDetailsService;
+    private CustomUserDetailsService userDetailsService;
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
+    @Autowired
+    private UserSecurity userSecurity;
     @Value("${api.prefix}")
     private String apiBasePath;
 
@@ -50,6 +53,7 @@ public class WorkoutTrackerConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    // TODO: Logout
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -60,9 +64,12 @@ public class WorkoutTrackerConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.requestMatchers(apiBasePath + "/auth/**", apiBasePath + "/test/all").permitAll()
-                                .anyRequest().authenticated()
-                );
+                        authorizeRequests
+                                .requestMatchers(apiBasePath + "/auth/**", apiBasePath + "/test/all").permitAll()
+                                .requestMatchers(apiBasePath + "/auth/logout").permitAll()
+                                .requestMatchers(apiBasePath + "/users/{userId}/**").access(userSecurity)
+                                .anyRequest().authenticated())
+                .logout(logout -> logout.logoutSuccessUrl(apiBasePath + "/auth/logout"));
         // JWT Token filter before the UsernamePasswordAuthenticationFilter
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
