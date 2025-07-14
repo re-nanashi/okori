@@ -1,4 +1,4 @@
-package com.okori.workout_tracker_api.security;
+package com.okori.workout_tracker_api.security.jwt;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

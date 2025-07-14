@@ -1,4 +1,4 @@
-package com.okori.workout_tracker_api.security;
+package com.okori.workout_tracker_api.security.user;
 
 import com.okori.workout_tracker_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class UserSecurity implements AuthorizationManager<RequestAuthorizationCo
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authenticationSupplier, RequestAuthorizationContext ctx) {
-        Long userId = Long.parseLong(ctx.getVariables().get("userId"));
+        Long userId = Long.parseLong(ctx.getVariables().get("userId")); // userID is from URI path
         Authentication authentication = (Authentication) authenticationSupplier.get();
         return new AuthorizationDecision(hasUserId(authentication, userId));
     }
@@ -27,6 +27,8 @@ public class UserSecurity implements AuthorizationManager<RequestAuthorizationCo
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-        return userRepository.findByUsername(authentication.getName()).getId() == userId;
+        return userRepository.findByEmail(authentication.getName())
+                .map(user -> user.getId() == userId)
+                .orElse(false);
     }
 }

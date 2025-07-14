@@ -11,6 +11,7 @@ public class WorkoutDTO {
     private List<WorkoutScheduleDTO> workoutSchedules;
 
     public WorkoutDTO() {}
+
     public WorkoutDTO(Long id, String name, String category, String description, List<ExerciseDTO> exercises, List<WorkoutScheduleDTO> workoutSchedules) {
         this.id = id;
         this.name = name;

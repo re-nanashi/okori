@@ -12,18 +12,16 @@ public class WorkoutSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
     @Column(name = "date", nullable = false)
     private Date date;
-
     @Column(name = "time", nullable = false)
     private Time time;
-
     @ManyToOne
     @JoinColumn(name = "workout_id", nullable = false)
     private Workout workout;
 
     public WorkoutSchedule() {}
+
     public WorkoutSchedule(Date date, Time time, Workout workout) {
         this.date = date;
         this.time = time;

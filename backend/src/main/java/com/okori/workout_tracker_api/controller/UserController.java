@@ -2,9 +2,7 @@ package com.okori.workout_tracker_api.controller;
 
 import com.okori.workout_tracker_api.dto.UserDTO;
 import com.okori.workout_tracker_api.entity.User;
-import com.okori.workout_tracker_api.exceptions.AlreadyExistsException;
 import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
-import com.okori.workout_tracker_api.request.CreateUserRequest;
 import com.okori.workout_tracker_api.request.UserUpdateRequest;
 import com.okori.workout_tracker_api.response.ApiResponse;
 import com.okori.workout_tracker_api.service.user.UserService;
@@ -12,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
@@ -32,6 +29,8 @@ public class UserController {
         }
     }
 
+    // TODO: User can update password
+    // ROLE_ADMIN can update user and it's password
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse> updateUser(@RequestBody UserUpdateRequest request, @PathVariable Long userId) {
         try {

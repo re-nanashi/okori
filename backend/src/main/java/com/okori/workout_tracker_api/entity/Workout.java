@@ -11,27 +11,22 @@ public class Workout {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "name", nullable = false)
     private String name;
-
     @Column(name = "category", nullable = false)
     private String category;
-
     @Column(name = "description")
     private String description;
-
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exercise> exercises = new ArrayList<>();
-
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutSchedule> workoutSchedules = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Workout() {}
+
     public Workout(String name, String category, String description, User user) {
         this.name = name;
         this.category = category;

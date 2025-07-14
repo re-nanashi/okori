@@ -1,15 +1,16 @@
 package com.okori.workout_tracker_api.security.config;
 
-import com.okori.workout_tracker_api.security.AuthEntryPointJwt;
-import com.okori.workout_tracker_api.security.AuthTokenFilter;
-import com.okori.workout_tracker_api.security.UserSecurity;
-import com.okori.workout_tracker_api.service.user.CustomUserDetailsService;
+import com.okori.workout_tracker_api.security.jwt.AuthEntryPointJwt;
+import com.okori.workout_tracker_api.security.jwt.AuthTokenFilter;
+import com.okori.workout_tracker_api.security.user.UserSecurity;
+import com.okori.workout_tracker_api.security.user.OkoriUserDetailsService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,7 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class WorkoutTrackerConfig {
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private OkoriUserDetailsService userDetailsService;
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
     @Autowired
@@ -44,13 +45,21 @@ public class WorkoutTrackerConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        var authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
     }
 
     // TODO: Logout
@@ -65,7 +74,7 @@ public class WorkoutTrackerConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(apiBasePath + "/auth/**", apiBasePath + "/test/all").permitAll()
+                                .requestMatchers(apiBasePath + "/auth/**", apiBasePath + "/test/all").permitAll() // for testing
                                 .requestMatchers(apiBasePath + "/auth/logout").permitAll()
                                 .requestMatchers(apiBasePath + "/users/{userId}/**").access(userSecurity)
                                 .anyRequest().authenticated())

@@ -1,4 +1,4 @@
-package com.okori.workout_tracker_api.security;
+package com.okori.workout_tracker_api.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

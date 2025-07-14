@@ -22,6 +22,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 // TODO: Work on business logic validations
+// [ ] Research service layer best practices
+// [ ] Should the methods return Optional?
+// [ ] 
 @Service
 @Transactional
 public class WorkoutService implements IWorkoutService {

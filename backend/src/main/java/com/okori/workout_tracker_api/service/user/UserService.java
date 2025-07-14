@@ -1,7 +1,11 @@
 package com.okori.workout_tracker_api.service.user;
 
+import com.okori.workout_tracker_api.data.RoleRepository;
 import com.okori.workout_tracker_api.dto.UserDTO;
+import com.okori.workout_tracker_api.entity.Role;
 import com.okori.workout_tracker_api.entity.User;
+import com.okori.workout_tracker_api.entity.UserRole;
+import com.okori.workout_tracker_api.exceptions.AlreadyExistsException;
 import com.okori.workout_tracker_api.exceptions.ResourceNotFoundException;
 import com.okori.workout_tracker_api.repository.UserRepository;
 import com.okori.workout_tracker_api.request.CreateUserRequest;
@@ -11,9 +15,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -22,6 +29,10 @@ public class UserService implements IUserService {
     private UserRepository userRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User getUserById(Long id) {
@@ -32,20 +43,24 @@ public class UserService implements IUserService {
 
     @Override
     public User createUser(CreateUserRequest request) {
+        Role userRole = roleRepository.findByName(UserRole.ROLE_USER.toString()).get();
         return Optional.of(request)
-                .filter(user -> !userRepository.existsByUsername(request.getUsername()))
+                .filter(user -> !userRepository.existsByEmail(request.getEmail()))
                 .map(req -> {
                     User user = new User(
                             request.getFirstName(),
                             request.getLastName(),
-                            request.getUsername(),
-                            request.getPassword());
+                            request.getEmail(),
+                            passwordEncoder.encode(request.getPassword()),
+                            Set.of(userRole));
                     return userRepository.save(user);
-                }).orElseThrow(() -> new ResourceNotFoundException("Oops!" +request.getUsername() +" already exists!"));
+                }).orElseThrow(() -> new AlreadyExistsException("Error! " + request.getEmail() + " already exists!"));
     }
 
     @Override
     public User updateUser(UserUpdateRequest request, Long userId) {
+        // TODO: Check if there is a newPasswordRequest
+
         return userRepository
                 .findById(userId)
                 .map(existingUser -> {
@@ -74,7 +89,8 @@ public class UserService implements IUserService {
     @Override
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        return userRepository.findByUsername(username);
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
 }

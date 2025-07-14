@@ -4,9 +4,9 @@ import com.okori.workout_tracker_api.dto.UserDTO;
 import com.okori.workout_tracker_api.entity.User;
 import com.okori.workout_tracker_api.repository.UserRepository;
 import com.okori.workout_tracker_api.response.ApiResponse;
-import com.okori.workout_tracker_api.service.user.CustomUserDetailsService;
+import com.okori.workout_tracker_api.security.user.OkoriUserDetailsService;
+import com.okori.workout_tracker_api.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +20,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("${api.prefix}/test")
 public class TestController {
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private OkoriUserDetailsService userDetailsService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/all")
     public String allAccess() {
@@ -32,16 +34,12 @@ public class TestController {
     @GetMapping("/user")
     public ResponseEntity<ApiResponse> userAccess() {
         try {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String userName;
-            if (principal instanceof UserDetails) {
-                userName = ((UserDetails) principal).getUsername();
-            } else {
-                userName = principal.toString();
-            }
-            User user = userRepository.findByUsername(userName);
-            UserDTO userDTO = new UserDTO(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername());
-
+            User authenticatedUser = userService.getAuthenticatedUser();
+            UserDTO userDTO = new UserDTO(
+                    authenticatedUser.getId(),
+                    authenticatedUser.getFirstName(),
+                    authenticatedUser.getLastName(),
+                    authenticatedUser.getEmail());
             return ResponseEntity.ok(new ApiResponse("Success", userDTO));
         } catch (Exception e) {
             return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));

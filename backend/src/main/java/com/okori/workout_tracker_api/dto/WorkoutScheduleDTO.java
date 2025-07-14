@@ -6,14 +6,13 @@ import java.sql.Time;
 
 public class WorkoutScheduleDTO {
     private Long id;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date date;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private Time time;
 
     public WorkoutScheduleDTO() {}
+
     public WorkoutScheduleDTO(Long id, Date date, Time time) {
         this.id = id;
         this.date = date;

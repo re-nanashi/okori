@@ -1,6 +1,6 @@
-package com.okori.workout_tracker_api.security;
+package com.okori.workout_tracker_api.security.jwt;
 
-import com.okori.workout_tracker_api.service.user.CustomUserDetailsService;
+import com.okori.workout_tracker_api.security.user.OkoriUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtils;
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private OkoriUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
